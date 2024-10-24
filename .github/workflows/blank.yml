@@ -1,0 +1,106 @@
+import random
+import time
+
+# Define Player class to track player statistics
+class Player:
+    def __init__(self, name, position):
+        self.name = name
+        self.position = position
+        self.goals = 0
+        self.assists = 0
+        self.penalties = 0
+
+    def __str__(self):
+        return f"{self.name} - {self.position} | Goals: {self.goals}, Assists: {self.assists}, Penalties: {self.penalties}"
+
+# Define Team class to manage team players and stats
+class Team:
+    def __init__(self, name):
+        self.name = name
+        self.players = []
+        self.score = 0
+
+    def add_player(self, player):
+        self.players.append(player)
+
+    def get_random_player(self):
+        return random.choice(self.players)
+
+    def __str__(self):
+        return f"Team {self.name} | Score: {self.score}"
+
+# Define Game class to simulate the hockey game
+class HockeyGame:
+    def __init__(self, team1, team2, periods=3):
+        self.team1 = team1
+        self.team2 = team2
+        self.periods = periods
+        self.current_period = 1
+
+    def simulate_penalty(self, team):
+        player = team.get_random_player()
+        player.penalties += 1
+        print(f"{player.name} from {team.name} received a penalty!")
+
+    def simulate_goal(self, team):
+        scorer = team.get_random_player()
+        assister = team.get_random_player()
+        while assister == scorer:
+            assister = team.get_random_player()
+
+        scorer.goals += 1
+        assister.assists += 1
+        team.score += 1
+        print(f"GOAL by {scorer.name} (Assist: {assister.name}) for {team.name}!")
+
+    def simulate_power_play(self, team_offense, team_defense):
+        print(f"{team_offense.name} is on a Power Play!")
+        if random.random() < 0.6:  # Higher chance of scoring in a power play
+            self.simulate_goal(team_offense)
+        else:
+            print(f"{team_defense.name} successfully defended the power play!")
+
+    def play_period(self):
+        print(f"\n--- Period {self.current_period} ---")
+
+        for _ in range(5):  # Simulate 5 key events per period
+            event = random.choice(["goal", "penalty", "regular"])
+
+            if event == "goal":
+                team = random.choice([self.team1, self.team2])
+                self.simulate_goal(team)
+            elif event == "penalty":
+                team = random.choice([self.team1, self.team2])
+                self.simulate_penalty(team)
+                self.simulate_power_play(self.team1 if team == self.team2 else self.team2, team)
+            else:
+                print("Regular play continues...")
+
+        self.current_period += 1
+
+    def display_stats(self):
+        print(f"\n--- Final Score ---\n{self.team1}: {self.team1.score}\n{self.team2}: {self.team2.score}\n")
+        for player in self.team1.players + self.team2.players:
+            print(player)
+
+    def simulate_game(self):
+        while self.current_period <= self.periods:
+            self.play_period()
+            time.sleep(1)
+        self.display_stats()
+
+# Create players for both teams
+team1 = Team("Penguins")
+team2 = Team("Sharks")
+
+players_team1 = [Player(f"Player {i+1}", "Forward") for i in range(5)]
+players_team2 = [Player(f"Player {i+6}", "Forward") for i in range(5)]
+
+for player in players_team1:
+    team1.add_player(player)
+for player in players_team2:
+    team2.add_player(player)
+
+# Simulate the hockey game
+game = HockeyGame(team1, team2)
+game.simulate_game()
